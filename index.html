@@ -36,7 +36,7 @@
 				td_index.innerText = list.length - i;
 				td_title.innerText = title;
 				td_date.innerText = date;
-				var type = date.substring(0, 4);
+				var type = date.substring(0, 8);
 				var directory = title.replace(/\//g, "-").replace(/\./g, "_");
 				var href = "./articles/" + type + "/" + directory + "/index.html";
 				td_title.href = href;
