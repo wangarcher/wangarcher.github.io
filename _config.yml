@@ -1,26 +1,24 @@
-# Site settings
-title: "Paper Jekyll Theme"
-description: > 
-  Write a description of your website here.
+title: Parchment
+author: pro-panda
+subtitle: The life of a frustrated engineer
 
-author: Johnny Appleseed
-email: johnny@appleseed.com
-twitter_username: _HairForceOne
-github_username: mkchoi212
+url: "https://rahul-bothra.github.io"
+baseurl: "/parchment"
 
-baseurl: "/paper-jekyll-theme" # the subpath of your site, e.g. /blog
-url: "https://deadbeef.me" # the base hostname & protocol for your site
+footer_only_homepage: true
+footer_url: "https://github.com/rahul-bothra"
+footer_text: "Theme by rahul-bothra"
 
-google_analytics_id: UA-1111111111-1
-disqus_id:
+profile-picture: assets/profile.png
+favicon_location: assets/favicon.ico
 
-# Build settings
-include: [_pages]
-markdown: kramdown
-permalink: /:year/:month/:title.html
-
+permalink: /:year-:month-:day-:title/
 sass:
     style: compressed
+    sass_dir: css
 
-exclude: [vendor]
-
+navbar:
+ - name: "About"
+   link: "about"
+ - name: "Resume"
+   absolute-link: "https://rahul-bothra.github.io/CV.pdf"

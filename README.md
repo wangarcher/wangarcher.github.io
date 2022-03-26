@@ -1,56 +1,37 @@
-<p align="center">
-  <img src="./assets/paper-cover-photo.png">
-  <p align="center">
-  A minimalistic Jekyll Theme
-  <br>
-  <br>
-  <a href="https://travis-ci.org/mkchoi212/paper-jekyll-theme"><img src="https://travis-ci.org/mkchoi212/paper-jekyll-theme.svg?branch=master"></a>
-  <a href="https://raw.githubusercontent.com/mkchoi212/paper-jekyll-theme/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
-  </p>
-</p>
-<br>
+# Parchment
+A clean, single column blog template built for jekyll
 
-Paper is a minimal Jekyll theme. Perfect for hosting your personal site, blog, or portfolio on GitHub or self-hosting on your own server. The styling is purposely minimalistic so that you can add your own flare to the website.
-
-Live demo of the theme can be seen [here](https://deadbeef.me/paper-jekyll-theme/). I'm also currently using this theme on my [personal blog](https://www.deadbeef.me).
-
-## Features
-- Compatible with Jekyll 3.x and **Github Pages**
-- Live local reloading for faster development
-- **Responsive layout** built-in
-- Supports Jekyll's built-in Sass/SCSS preprocessor
-- Supports **Google Analytics**
-- Supports **Disqus** for commenting
-- Minimum Dependencies
-- Rakefile for automation
-    - `rake check`    - Check links/html files of the generated site
-    - `rake clean`    - Clean up generated site
-    - `rake post`     - Begin a new post in `./_posts`
-    - `rake preview`  - Preview with livereload on local machine
+## Building Locally
+* Clone the repository
+* Run `bundle install`
+* Run `bundle exec jekyll serve`
+* Visit browser at `http://127.0.0.1:4000/parchment/`
 
 ## Usage
-```
-git clone https://github.com/mkchoi212/paper-jekyll-theme.git
-bundle install
-rake preview
-```
 
-Then, go to your favorite brower and type in the address `http://127.0.0.1:YOUR_PORT_NUM_HERE` to preview your website.
+* To use this as your GitHub Page, fork this repository, and
+  rename it to `<username>.github.io`. Your site will be live
+  at `https://<username>.github.io/parchment-jekyll`.
 
-### Customization
-To customize various details - title/description of the website, your SNS accout names, etc - edit the `_config.yml` file. 
+* You can customise variables in `_config.yml` and `css/*` files.
 
-### Adding posts
-```
-rake post title="A Title" [date="2012-02-09"] [tags=[tag1,tag2]] [category="category"]
-```
-This will create a markdown file in the default folder where all posts are stored in Jekyll; `_post`.
+* You can add markdown files, say `foo.md` in the root directory
+  of the repository. It will then be accessible like
+  `your.website.com/foo`.
 
-If you wish to **change the directory where posts are saved**, go to the `Rakefile` and edit the `CONFIG = { 'posts': CUSTOM_PATH_HERE }`. This will allow `rake post` to know where to save the new posts to.
+* To add posts, add your posts in the `_posts` directory. Follow
+  the naming convention `%yyyy-%mm-%dd-your-title-here.md`.
 
-The **drafts** you are working on can be saved in the `_drafts` directory. When you push your code to the server, files in this directory will NOT be included to the list of posts.
+* To add a profile picture, use class `profile-picture` around
+  the image.
 
-# License
+## Contributing
+Pull requests are welcome. For major changes, please open an
+issue first to discuss what you would like to change.
 
-Please see [LICENSE](./LICENSE)
+## Credits
+Parchment is inspired from the resume theme
+[Researcher](https://github.com/ankitsultana/researcher)
 
+## License
+[GNU GPL v3](LICENSE)
