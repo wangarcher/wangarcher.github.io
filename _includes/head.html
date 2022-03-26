@@ -1,35 +1,27 @@
 <head>
-    {% if page.title %}
-        {% assign title = page.title | append: " - " | append: site.title %}
-        {% assign desc = page.subtitle %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {% if page.title == "Home" %}
+    <meta name="description" content="{{ site.description }}">
+  {% endif %}
+
+  <title>
+    {% if page.title == "Home" %}
+      {{ site.title }}
     {% else %}
-        {% assign title = site.title %}
-        {% assign desc = site.subtitle %}
+      {{ page.title }} &middot; {{ site.title }}
     {% endif %}
-    {% assign sitedir = site.url | append: site.baseurl | append: "/" %}
-    {% assign favicon_location = sitedir | append: site.favicon_location %}
+  </title>
 
-    <title>{{ title }}</title>
+  <!-- CSS -->
+  <link rel="stylesheet" href="{{ "/assets/main.css" | relative_url }}">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
 
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="keywords" content="blog, {{ site.author }}, {{ site.title }}, jekyll">
-    <meta name="author" content="{{ site.author }}">
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ "/assets/favicon-32x32.png" | relative_url }}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ "/assets/favicon-16x16.png" | relative_url }}">
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ "/assets/apple-touch-icon.png" | relative_url }}">
 
-    <meta name="description" content="{{ desc }}">
-    <link href='https://fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="{{ sitedir }}css/main.css">
-    <link rel="icon" type="image/ico" href="{{ favicon_location }}">
-    <link rel="shortcut-icon" type="image/ico" href="{{ favicon_location }}">
-
-    <!-- For Facebook -->
-    <meta property="og:title" content="{{ title }}" />
-    <meta property="og:image" itemprop="image" content="{{ favicon_location }}" />
-    <meta property="og:description" content="{{ desc }}" />
-
-    <!-- For Twitter -->
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content="{{ title }}" />
-    <meta name="twitter:description" content="{{ desc }}" />
-    <meta name="twitter:image" content="{{ favicon_location }}" />
+  <!-- RSS -->
+  {% feed_meta %}
 </head>

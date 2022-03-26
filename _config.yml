@@ -1,24 +1,40 @@
-title: Parchment
-author: pro-panda
-subtitle: The life of a frustrated engineer
+# Site settings
+title:          Rain
+description:    "Rain is a simple and clean Jekyll theme with focus on content."
+url:            https://github.com/inelaah/rain
 
-url: "https://rahul-bothra.github.io"
-baseurl: "/parchment"
+# Author
+author:
+  name:         Inela Avdic Hukic
+  email:        inelaah@gmail.com
+  url:          https://inelaah.com
 
-footer_only_homepage: true
-footer_url: "https://github.com/rahul-bothra"
-footer_text: "Theme by rahul-bothra"
+# Build settings
+markdown:       kramdown
 
-profile-picture: assets/profile.png
-favicon_location: assets/favicon.ico
-
-permalink: /:year-:month-:day-:title/
+# Assets
 sass:
-    style: compressed
-    sass_dir: css
+  sass_dir:     _sass
+  style:        compressed
 
-navbar:
- - name: "About"
-   link: "about"
- - name: "Resume"
-   absolute-link: "https://rahul-bothra.github.io/CV.pdf"
+# Gems
+plugins:
+  - jekyll-feed
+  - jekyll-paginate
+  # - jemoji #Uncomment this to allow emoji in your post
+
+# Permalinks
+permalink:      /:year-:month-:day/:title
+paginate:       5
+
+# Related posts settings
+related_posts_section:
+  max_count:        5
+  min_common_tags:  2
+
+# Links to social media
+social:
+  email: inelaah@gmail.com
+  github: https://github.com/inelaah
+  twitter: https://twitter.com
+  linkedin: https://ba.linkedin.com/in/inela-avdic-hukic-322354131
