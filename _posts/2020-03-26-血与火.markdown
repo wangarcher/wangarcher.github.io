@@ -1,0 +1,56 @@
+---
+layout: post
+title:  "血与火"
+subtitle: "节选自——林之渊少校的回忆录《火海中南》"
+date:   2022-03-19 23:56:45
+categories: [jotting]
+---
+
+“熊熊烈焰烧灼着整片丛林，几个小时之内，热浪就会把它所经过的一切都化成灰。可是从观察窗向下看，那火线竟还有一丝诡异的美感，就像是魔鬼手中抽动着的皮鞭。是的，我的意思是我们就是魔鬼。”——空军第67特别行动中队96074号机副驾驶，张明德
+
+
+## Header 2
+
+Duis lacinia commodo dui, vel aliquam metus hendrerit eu. Integer et scelerisque dui. Sed nec molestie quam. Donec sit amet nisl a massa commodo ultrices nec quis nunc. Aenean aliquet eu arcu adipiscing dignissim. Nunc dictum elit vitae dolor molestie aliquet.
+
+
+Example code:
+
+{% highlight javascript %}
+var light = new Light();
+var switchUp = new FlipUpCommand(light);
+var switchDown = new FlipDownCommand(light);
+var s = new Switch();
+
+s.storeAndExecute(switchUp);
+s.storeAndExecute(switchDown);
+{% endhighlight %}
+
+
+A list:
+
+- Praesent nisi elit, bibendum ut consectetur ac, aliquet in nunc
+- Donec ante est, volutpat in mi et, pulvinar congue dolor.
+- Quisque ultrices pulvinar sollicitudin.
+- Duis elementum odio eu euismod suscipit.
+- Integer enim lorem, interdum sit amet consectetur non, bibendum eget neque.
+
+A numbered list:
+
+1. Praesent nisi elit, bibendum ut consectetur ac, aliquet in nunc.
+2. Donec ante est, volutpat in mi et, pulvinar congue dolor.
+3. Quisque ultrices pulvinar sollicitudin.
+4. Duis elementum odio eu euismod suscipit.
+5. Integer enim lorem, interdum sit amet consectetur non, bibendum eget neque.
+
+Definition list:
+
+Curabitur cursus magna eu sem cursus
+: ac ultrices urna pharetra.
+: Duis scelerisque ipsum eu luctus elementum.
+
+Pellentesque habitant morbi tristique senectus
+: Curabitur malesuada lacus ac gravida porttitor
+: Duis sodales feugiat lorem et mollis.
+
+Want to suggest something? Please [Send me a request](https://github.com/kronik3r/daktilo/issues/new).
