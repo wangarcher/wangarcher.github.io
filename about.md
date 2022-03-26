@@ -1,12 +1,13 @@
 ---
 layout: page
 title: About
-subtitle: Just who the hell you think I am?
+subtitle: 这里是王逸飞在网络空间上的投影。
 permalink: /about/
 ---
 
-This is the base Jekyll theme. You can find out more info about customizing your Jekyll theme, as well as basic Jekyll usage documentation at [jekyllrb.com](http://jekyllrb.com/)
+作为一个大龄青年研究者，王逸飞在做一些看上去旁征博引的，理论上顾此失彼的，现实中难堪大用的，但是却又有一些微小价值的移动机械臂的科学研究。你可以在[阿切尔先生的github](http://github.com/wangarcher)中大致了解王逸飞目前所感兴趣的工作。
 
-You can find the source code for the Jekyll new theme at: [github.com/jglovier/jekyll-new](https://github.com/jglovier/jekyll-new)
+同时，他也是一位资深的写作爱好者，但鉴于其思想的幼稚，以及辞藻的贫乏，王先生只能写出一些还算可以的短篇和微型小说。当然，王逸飞时有时无的灵感以及难以自洽的逻辑也导致了其不能进行长篇小说的创作。（再当然，世俗的眼光也导致他不能专注于长时间的创作。）
 
-You can find the source code for Jekyll at [github.com/jekyll/jekyll](https://github.com/jekyll/jekyll)
+虽然王逸飞先生退出评论界已经很多年了，但是对于一个批评家而言，他给出的每一个差评都可能引起像雪崩一样的链式反应。如果您对此感兴趣，则可以在本网站中试着对王逸飞先生的评价做出评价。
+

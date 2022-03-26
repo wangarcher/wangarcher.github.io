@@ -9,48 +9,69 @@ categories: [jotting]
 “熊熊烈焰烧灼着整片丛林，几个小时之内，热浪就会把它所经过的一切都化成灰。可是从观察窗向下看，那火线竟还有一丝诡异的美感，就像是魔鬼手中抽动着的皮鞭。是的，我的意思是我们就是魔鬼。”——空军第67特别行动中队96074号机副驾驶，张明德
 
 
-## Header 2
 
-Duis lacinia commodo dui, vel aliquam metus hendrerit eu. Integer et scelerisque dui. Sed nec molestie quam. Donec sit amet nisl a massa commodo ultrices nec quis nunc. Aenean aliquet eu arcu adipiscing dignissim. Nunc dictum elit vitae dolor molestie aliquet.
+整支队伍在泥泞的路上艰难前进。
 
+照这个速度我们应该还有5个小时就可以到达中缅边境了。可我一点都松懈不下来，我们这个状态很有可能没有办法过境。营里一共有25个重伤，其中有13个感染，很有可能救不回来了。关口卡的很严，要是想过去，要先解决感染人员的问题。
 
-Example code:
+我没用对讲机，点了根烟下车，等了医官一会儿。
 
-{% highlight javascript %}
-var light = new Light();
-var switchUp = new FlipUpCommand(light);
-var switchDown = new FlipDownCommand(light);
-var s = new Switch();
+“营长，我估计是够呛。打了两天的米开民，八成是拉不回来了。其他的我觉得还能撑，感染的……你还是早做打算为好。”
 
-s.storeAndExecute(switchUp);
-s.storeAndExecute(switchDown);
-{% endhighlight %}
+我抽着烟，头也没抬，“再等等。”
 
+我们一路撤退，作为全旅的殿后。
 
-A list:
+79军出师不利——先头部队116旅没能在马六甲阻止敌人登陆，6个集团军的防御作战计划瞬间变成一纸空谈。
 
-- Praesent nisi elit, bibendum ut consectetur ac, aliquet in nunc
-- Donec ante est, volutpat in mi et, pulvinar congue dolor.
-- Quisque ultrices pulvinar sollicitudin.
-- Duis elementum odio eu euismod suscipit.
-- Integer enim lorem, interdum sit amet consectetur non, bibendum eget neque.
+这不是任何人的错误，海峡太浅了。1000多公里的战线上只有6个军的力量，我们一开始就是在搏命。
 
-A numbered list:
+这场行动其实在一开始就有很大的的赌徒性质，只不过我们现在已经没有什么可以失去的了——无论怎么赌，我们都一定会输个精光。我们这次的行动主要就是为了争取时间，为中南半岛布防做准备。据中央那边分析，敌人准备一次进攻的时间大约是27天左右。这6个集团军要在这1000多公里的海岸线上拖出尽可能多的27天。
 
-1. Praesent nisi elit, bibendum ut consectetur ac, aliquet in nunc.
-2. Donec ante est, volutpat in mi et, pulvinar congue dolor.
-3. Quisque ultrices pulvinar sollicitudin.
-4. Duis elementum odio eu euismod suscipit.
-5. Integer enim lorem, interdum sit amet consectetur non, bibendum eget neque.
+我们一个27天都没有拖出来。
 
-Definition list:
+“我们败了吧……”，医官的话把我拉回了现实。
 
-Curabitur cursus magna eu sem cursus
-: ac ultrices urna pharetra.
-: Duis scelerisque ipsum eu luctus elementum.
+“瞎说什么，等过了境我看你还敢放一个屁？”我把烟蒂一扔，恶狠狠地说道。
 
-Pellentesque habitant morbi tristique senectus
-: Curabitur malesuada lacus ac gravida porttitor
-: Duis sodales feugiat lorem et mollis.
+我们败了，我想。
 
-Want to suggest something? Please [Send me a request](https://github.com/kronik3r/daktilo/issues/new).
+这是力量，速度和耐性的绝对碾压。我们本以为可以摆好架势好好打上一架，压根没有人会意识到是如此的惨烈。潘泰海滩的116旅守军最开始被撕碎，越南第4军和80军的兄弟去挡差，用7000条人命给我们打出了30个小时的撤退时间。74军在的撤退路线被拦腰切断，和新加坡陆军固守了四天四夜，昨天傍晚用几颗核弹和敌人同归于尽了。我们94军压力最轻，但是也付出了惨痛的代价，在掩护友军撤退的路上不断地和敌人交火，冲突。这一路上我们扔下了不少兄弟。
+
+所有人都在绝望。
+
+我向医官确认，“真的没救了？”
+
+医官摇了摇头，没作声。
+
+行吧，恶人我做！
+
+“老罗！前面找个犄角旮旯停一下，你们几个，一会儿帮我把人抬出去。”
+
+车行驶到一个小树林旁，我看这附近没什么人，“就在这儿烧吧。”
+
+我回身望风的时候看见老罗他们把张洋抬了下来。
+
+张洋今年23岁，大四的时候从学校统战部征来的。人如其名，淘气的很，平时惹祸不少，我们这些老油条念他是个孩子，也都睁一只眼闭一只眼。
+
+如果是过去，他看见我的时候大多会非常打趣地喊一句：“哟，首长好呀！”
+
+但是现在他躺在担架上，整个人都快被折磨的不成人形，一句话都说不出来，呼吸的时候还带着呼噜呼噜的声音。
+
+“不中了，都不中了。”，医官摇着头。
+
+我叹了口气，拨开手枪的保险，把子弹上膛。
+
+……
+
+滚烫的弹壳。
+
+汽油。
+
+远处飞过的纵火轰炸机。
+
+燃烧的树林。
+
+……
+
+一切都好热。
