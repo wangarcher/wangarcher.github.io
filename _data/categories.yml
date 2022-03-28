@@ -8,4 +8,7 @@
   name: Productivity
 
 - slug: jotting
-  name: jotting
+  name: Jotting
+
+- slug: review
+  name: Review
