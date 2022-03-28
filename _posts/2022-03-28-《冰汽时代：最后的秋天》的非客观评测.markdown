@@ -1,10 +1,11 @@
 ---
 layout: post
 title:  "《冰汽时代：最后的秋天》的非客观评测"
-subtitle: "Prey的后评"
-date:   2022-03-28 20:13:45
-categories: [review]
+subtitle: ""
+date:   2022-03-19 23:56:45
+categories: [jotting]
 ---
+
 
 最近实在太忙，搞得我现在才得闲写下这篇评测。
 
