@@ -3,7 +3,7 @@ layout: post
 title:  "《冰汽时代：最后的秋天》的非客观评测"
 subtitle: ""
 date:   2022-03-19 23:56:45
-categories: [jotting]
+categories: [jotting, review]
 ---
 
 

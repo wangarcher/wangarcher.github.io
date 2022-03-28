@@ -3,7 +3,7 @@ layout: post
 title:  "Prey的二三偏颇表达"
 subtitle: "Prey的后评"
 date:   2022-03-28 20:12:45
-categories: [review]
+categories: [jotting, review]
 ---
 
 （本文没有任何防剧透黑幕且含有海量重要剧透，若不想影响游戏体验，请立刻退出！）
