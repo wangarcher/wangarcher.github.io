@@ -1,8 +1,8 @@
 ---
 layout: post
-title:  "月岩"
-subtitle: "节选自林闻道的个人日记（林闻道，2011-，国联空间探索总局-地外基建中级工程师）"
-date:   2022-03-19 23:56:45
+title:  "五楼走廊"
+subtitle: "那天小A喝多了……"
+date:   2022-07-01 23:56:45
 categories: [jotting]
 ---
 

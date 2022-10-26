@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "月岩"
-subtitle: "节选自林闻道的个人日记（林闻道，2011-，国联空间探索总局-地外基建中级工程师）"
+title:  "笼子"
+subtitle: "虚假的灵魂，真诚的爱"
 date:   2022-03-19 23:56:45
 categories: [jotting]
 ---
