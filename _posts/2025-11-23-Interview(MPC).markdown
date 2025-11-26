@@ -156,9 +156,331 @@ $$
 
 # OCS2中的SQP优化过程是什么？
 
-## 一、在第$k$次迭代中
+## 零、在第$k$次迭代中
 1. 线性化 dynamics 和 constraints
 2. 二次近似 cost
 3. 得到一个 quadratic program (QP)
 4. 求解 QP 得到一个 增量方向
 5. 更新轨迹，重复迭代
+
+## 一、给定初始控制序列 $u_{0:N-1}$
+
+通常来自：
+- 上一次 MPC 控制循环的解，或  
+- 简单的 warm start（零控制 / PD 控制等）。  
+
+## 二、Forward Rollout —— 生成名义轨迹
+
+基于系统动力学：
+$$
+\dot{x}(t) = f(x(t), u(t))
+$$
+
+从初始状态 $x_0$ 前向积分：
+
+$$
+x_{k+1} = x_k + \int_0^{\Delta t} f(x(t), u_k)\, dt
+$$
+```
+注：OCS2中的积分实际上主要是直接加，RK4都没用，这可能是导致他性能不佳的原因。
+```
+
+得到名义轨迹：
+$$
+\{x_k, u_k\}_{k=0}^{N}
+$$
+
+此轨迹满足动力学，用于后续线性化。
+
+## 三、对动力学与成本函数进行二阶泰勒展开（Local Bellman Expansion）
+
+### 动力学线性化：
+$$
+\delta x_{k+1} \approx A_k \delta x_k + B_k \delta u_k
+$$
+
+其中：
+$$
+A_k = \frac{\partial f}{\partial x}\Big|_{x_k,u_k}, \qquad 
+B_k = \frac{\partial f}{\partial u}\Big|_{x_k,u_k}
+$$
+
+### Cost 二阶展开：
+$$
+\ell(x_k,u_k) \approx \ell_k 
++ q_k^\top \delta x_k + r_k^\top \delta u_k 
++ \frac12 
+\begin{bmatrix} \delta x_k \\ \delta u_k \end{bmatrix}^\top
+\begin{bmatrix} Q_k & P_k \\ P_k^\top & R_k \end{bmatrix}
+\begin{bmatrix} \delta x_k \\ \delta u_k \end{bmatrix}
+$$
+
+终端成本同理展开。
+
+## 四、构造等效的 Quadratic Program (QP)
+
+目标为：
+$$
+\min_{\delta x,\delta u}
+\sum_{k=0}^{N-1} \left(
+\frac12 
+\begin{bmatrix}\delta x_k \\ \delta u_k\end{bmatrix}^\top
+H_k
+\begin{bmatrix}\delta x_k \\ \delta u_k\end{bmatrix}
++
+g_k^\top
+\begin{bmatrix}\delta x_k \\ \delta u_k\end{bmatrix}
+\right)
++
+\frac12 \delta x_N^\top Q_N \delta x_N + q_N^\top\delta x_N
+$$
+
+约束为线性化动力学：
+$$
+\delta x_{k+1} = A_k \delta x_k + B_k \delta u_k
+$$
+
+---
+
+## 五、用 Riccati-like backward sweep 求解 QP（也称 LQ Optimal Control）
+
+利用动态规划，做一次 backward pass：
+
+### value function：
+$$
+V_k(\delta x_k) = 
+\frac12 \delta x_k^\top S_k \delta x_k + s_k^\top \delta x_k
+$$
+
+### Riccati 递推：
+$$
+K_k = -(R_k + B_k^\top S_{k+1} B_k)^{-1}(P_k^\top + B_k^\top S_{k+1} A_k)
+$$
+
+$$
+d_k = -(R_k + B_k^\top S_{k+1} B_k)^{-1}(r_k + B_k^\top s_{k+1})
+$$
+
+更新：
+$$
+S_k = Q_k + A_k^\top S_{k+1} A_k + 
+K_k^\top(R_k + B_k^\top S_{k+1}B_k)K_k
+$$
+
+$$
+s_k = q_k + A_k^\top s_{k+1} +
+K_k^\top (R_k + B_k^\top S_{k+1}B_k)d_k
+$$
+
+最终得到控制修正：
+$$
+\delta u_k = K_k\, \delta x_k + d_k
+$$
+
+---
+
+## 六、更新控制并执行 line search
+
+更新控制：
+$$
+u_k^{new} = u_k + \alpha \, \delta u_k
+$$
+
+其中 $\alpha \in (0,1]$ 由 line search 确定，以保证成本下降。
+
+---
+
+## 七、重复迭代直到收敛
+
+判断条件：
+- 控制更新幅度变小  
+- 成本下降足够  
+- 达到最大迭代次数  
+
+然后输出：
+- 最优控制序列  
+- 最优状态轨迹（通过最后一次 rollout 得到）
+
+
+
+# SQP中Riccati backward/forward pass 的具体步骤
+
+## A. 目标（Purpose）
+在 SQP/ILQR 中，当我们把原非线性问题在第 $k$ 次迭代近似为线性动力学 + 二次代价（LQ subproblem）时，可以通过 Riccati backward recursion 求出局部最优控制增量：
+$$
+\delta u_i = k_i + K_i\,\delta x_i
+$$
+其中：
+- $k_i$：开环控制增量  
+- $K_i$：反馈增益  
+
+该策略确保 LQ 子问题的 **精确最优解**，并具有线性复杂度 $O(N)$（对 horizon $N$）。
+
+---
+
+## B. 局部增量代价定义（Quadratic approximation）
+定义状态与控制的增量：
+$$
+\delta x_i = x_i - x_{k,i}, \quad \delta u_i = u_i - u_{k,i}.
+$$
+
+二次近似的阶段代价写为：
+$$
+\ell_i(\delta x_i,\delta u_i) \approx 
+\frac{1}{2}
+\begin{bmatrix}
+\delta x \\ \delta u
+\end{bmatrix}^\top
+\begin{bmatrix}
+Q_{xx} & Q_{xu} \\
+Q_{ux} & Q_{uu}
+\end{bmatrix}
+\begin{bmatrix}
+\delta x \\ \delta u
+\end{bmatrix}
++
+\begin{bmatrix}
+q_x \\ q_u
+\end{bmatrix}^\top
+\begin{bmatrix}
+\delta x \\ \delta u
+\end{bmatrix}.
+$$
+
+动力学线性化：
+$$
+\delta x_{i+1} = A_i\,\delta x_i + B_i\,\delta u_i + d_i.
+$$
+
+最终代价：
+$$
+V_N(\delta x_N)=
+\frac12\, \delta x_N^\top V_{xx,N}\,\delta x_N + V_{x,N}^\top \delta x_N.
+$$
+
+---
+
+## C. Q-function（Bellman 局部展开）
+定义：
+$$
+Q_i(\delta x_i,\delta u_i)
+=
+\ell_i(\delta x_i,\delta u_i)
++ 
+V_{i+1}\left(A_i\delta x_i + B_i\delta u_i + d_i \right).
+$$
+
+代入值函数二次形式，可得：
+$$
+Q(\delta x,\delta u)
+=
+\frac12
+\begin{bmatrix}
+\delta x\\ \delta u
+\end{bmatrix}^\top
+\begin{bmatrix}
+Q_{xx}^Q & Q_{xu}^Q \\
+Q_{ux}^Q & Q_{uu}^Q
+\end{bmatrix}
+\begin{bmatrix}
+\delta x\\ \delta u
+\end{bmatrix}
++
+\begin{bmatrix}
+Q_x^Q\\ Q_u^Q
+\end{bmatrix}^\top
+\begin{bmatrix}
+\delta x\\ \delta u
+\end{bmatrix}
++ \text{const}.
+$$
+
+其中（常见计算公式）：
+$$
+\begin{aligned}
+Q_{xx}^Q &= Q_{xx} + A_i^\top V_{xx,i+1} A_i, \\
+Q_{uu}^Q &= Q_{uu} + B_i^\top V_{xx,i+1} B_i, \\
+Q_{ux}^Q &= Q_{ux} + B_i^\top V_{xx,i+1} A_i, \\
+Q_x^Q &= q_x + A_i^\top (V_{xx,i+1} d_i + V_{x,i+1}), \\
+Q_u^Q &= q_u + B_i^\top (V_{xx,i+1} d_i + V_{x,i+1}).
+\end{aligned}
+$$
+
+---
+
+## D. 求解局部最优控制增量（optimal $\delta u$）
+对 $Q$ 关于 $\delta u$ 求导并置零：
+$$
+\frac{\partial Q}{\partial \delta u}
+=
+Q_{uu}^Q\,\delta u + Q_{ux}^Q\,\delta x + Q_u^Q = 0.
+$$
+
+若 $Q_{uu}^Q$ 正定，可以得到：
+$$
+\delta u = k_i + K_i\delta x,
+$$
+其中：
+$$
+k_i = - (Q_{uu}^Q)^{-1} Q_u^Q,\qquad
+K_i = - (Q_{uu}^Q)^{-1} Q_{ux}^Q.
+$$
+
+> 数值上必须保证 $Q_{uu}^Q$ 正定，否则要做正则化  
+> $Q_{uu}^Q \leftarrow Q_{uu}^Q + \lambda I$（Levenberg–Marquardt 样式）。
+
+---
+
+## E. 值函数更新（Value function recursion）
+将最优 $\delta u$ 代入 $Q$，得到新的时刻值函数：
+$$
+V_{xx,i} = Q_{xx}^Q + Q_{xu}^Q K_i,
+$$
+$$
+V_{x,i} = Q_x^Q + Q_{xu}^Q k_i.
+$$
+
+这完成了一个时间步的 **backward** 递推。
+
+Backward pass 从 $i=N-1$ 递推到 $i=0$：
+
+```pseudo
+# backward pass
+V_x  = V_x_terminal
+V_xx = V_xx_terminal
+
+for i = N-1 ... 0:
+    # build Q terms
+    Q_xx, Q_uu, Q_ux, Q_x, Q_u = compute_Q_terms(A_i, B_i, V_xx, V_x)
+
+    # regularize for positive-definite
+    Q_uu = Q_uu + lambda * I
+
+    # compute gains
+    k_i = - inv(Q_uu) * Q_u
+    K_i = - inv(Q_uu) * Q_ux
+
+    # update value function
+    V_x  = Q_x  + Q_xu * k_i
+    V_xx = Q_xx + Q_xu * K_i
+```
+## F. Forward pass（利用策略生成新轨迹）
+
+向前滚动，用新的策略更新控制与状态：
+```
+x = x0
+for i = 0 ... N-1:
+    delta_x = x - x_nom[i]
+    delta_u = k_i + K_i * delta_x
+    u_new   = u_nom[i] + alpha * delta_u   # alpha: line search
+
+    x = integrate_forward(x, u_new)        # ODE solver
+```
+
+Forward pass 的主要作用：
+
+得到新的名义轨迹 
+
+评估真实 cost / KKT violation 是否下降
+
+为下一次迭代提供线性化基点
