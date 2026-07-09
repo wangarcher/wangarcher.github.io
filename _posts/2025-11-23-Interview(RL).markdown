@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "Interview(MPC)"
-subtitle: "MPC相关"
+subtitle: "RL相关"
 date:   2025-11-23 21:48:00
 categories: [jotting, review]
 ---
