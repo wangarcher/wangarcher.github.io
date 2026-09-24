@@ -164,3 +164,153 @@ Patch tokens（如果不使用池化）：可以构成序列，但其数量和�
 最后，**重规划时的动作不连续**。如果模型在 chunk 执行到一半时被新观测触发重新规划，新旧 chunk 之间的动作可能存在跳变，导致机器人抖动。如果不做平滑处理，会影响执行稳定性和安全性。
 
 因此，实际系统中需要在 chunk 长度和执行策略之间做权衡：较短的 chunk 能提高反应速度但损失一些时序一致性；较长的 chunk 能提升效率但引入延迟和误差。通常会结合重规划频率、动作平滑等技术来缓解这些问题。
+
+# π₀-FAST 中的动作表示与生成机制（核心理解）
+
+## 1. 自回归离散（Autoregressive Discrete Modeling）
+
+自回归（Autoregressive, AR）建模将序列分解为条件概率连乘：
+
+$$
+p(x_{1:T}) = \prod_{t=1}^{T} p(x_t \mid x_{<t})
+$$
+
+在 π₀-FAST（Pi-Zero Fast）中：
+
+- 输出不是连续动作，而是**离散 token（标记）**
+- 每一步预测下一个 token（类似语言模型）
+
+关键特点：
+
+- 顺序生成（sequential generation）
+- 使用 Transformer（Transformer 神经网络）建模 token 分布
+- 将控制问题转化为“序列建模问题”
+
+---
+
+## 2. FAST：频域动作标记化（Frequency-space Action Sequence Tokenization）
+
+FAST（Frequency-space Action Sequence Tokenization）核心思想：
+
+> 将时间域动作序列映射到频域，再进行离散化（tokenization）
+
+整体流程：
+
+$$
+\text{action trajectory } x \;\xrightarrow{\text{DCT}}\; C \;\xrightarrow{\text{quantization}}\; \text{tokens}
+$$
+
+其中：
+
+- DCT（Discrete Cosine Transform，离散余弦变换）将动作转换到频域
+- token 表示**频域系数的离散索引**
+- Transformer 学习的是 token 序列分布
+
+---
+
+## 3. DCT / IDCT 不是学习得到的
+
+一个关键点：
+
+> DCT（离散余弦变换）和 IDCT（Inverse Discrete Cosine Transform，逆离散余弦变换）是固定线性变换，而非神经网络学习模块
+
+形式上：
+
+$$
+C = D \cdot x
+\quad,\quad
+x = D^{-1} \cdot C
+$$
+
+其中：
+
+- $D$ 是固定的正交变换矩阵
+- $D^{-1} = D^\top$
+
+因此：
+
+- 无需训练 encoder / decoder
+- 无额外 reconstruction loss
+- 无信息瓶颈（理想情况下）
+
+---
+
+## 4. 从 token 到动作序列的恢复
+
+推理阶段流程：
+
+$$
+\text{tokens} \rightarrow \text{coefficients } C \rightarrow \text{IDCT} \rightarrow x_{1:T}
+$$
+
+具体步骤：
+
+1. token → embedding（嵌入向量）
+2. embedding → 频域系数（coefficient）
+3. IDCT（逆离散余弦变换）还原时间序列
+
+关键理解：
+
+> token 并不表示动作本身，而是“动作轨迹的频域表示”
+
+---
+
+## 5. 为什么在频域建模？
+
+### （1）低频主导（Low-frequency dominance）
+
+机器人动作通常是平滑的：
+
+- 主要信息集中在低频
+- 高频仅用于细节修正
+
+---
+
+### （2）更适合离散化（Tokenization-friendly）
+
+相比时间域：
+
+- 频域更稀疏
+- 分布更规则
+- 更容易量化为 token
+
+---
+
+### （3）长时依赖更容易建模
+
+在时间域：
+
+- 长序列难建模
+- 误差易累积
+
+在频域：
+
+- 每个系数影响全局轨迹
+- 更适合 Transformer 学习全局结构
+
+---
+
+## 6. 与其他方法对比
+
+| 方法 | 表示空间 | 生成方式 | 特点 |
+|------|----------|----------|------|
+| 自回归离散（AR discrete） | token | 逐步生成 | 快，但有离散误差 |
+| Diffusion policy（扩散策略） | 连续 | 迭代去噪 | 稳定但慢 |
+| Flow matching（流匹配） | 向量场 | 连续变换 | 全局一致 |
+| π₀-FAST | 频域 token | 自回归 | 快 + 保留轨迹结构 |
+
+---
+
+## 7. 核心总结
+
+> π₀-FAST 的本质是：  
+> **使用固定频域基（DCT）将连续动作映射到结构化空间，再通过自回归 Transformer 建模其离散表示，最后通过 IDCT 还原为连续控制轨迹。**
+
+可以理解为：
+
+- 不是逐步生成动作（time-domain control）
+- 而是生成“动作的频谱描述”（frequency-domain representation）
+
+类似：
+
+> “先生成乐谱，再演奏动作”
