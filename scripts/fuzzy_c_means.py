@@ -7,7 +7,11 @@ import random
 
 def squared_distance(point_a, point_b):
     """两点之间欧氏距离的平方（不开方也能比较远近）"""
-    return sum((a - b) ** 2 for a, b in zip(point_a, point_b))
+    distance = 0.0
+    for coordinate_a, coordinate_b in zip(point_a, point_b):
+        difference = coordinate_a - coordinate_b
+        distance += difference * difference
+    return distance
 
 
 def fuzzy_c_means(data_points, num_clusters, fuzziness=2.0, max_iters=100,
@@ -34,40 +38,81 @@ def fuzzy_c_means(data_points, num_clusters, fuzziness=2.0, max_iters=100,
     # ---------- 1. 初始化：每个样本一组随机的、总和为 1 的隶属度 ----------
     memberships = []
     for _ in range(num_points):
-        raw_values = [rng.random() for _ in range(num_clusters)]
-        total = sum(raw_values)
-        memberships.append([value / total for value in raw_values])
+        raw_values = []
+        for _ in range(num_clusters):
+            raw_values.append(rng.random())
+        total = 0.0
+        for value in raw_values:
+            total += value
+
+        normalized_values = []
+        for value in raw_values:
+            normalized_values.append(value / total)
+        memberships.append(normalized_values)
 
     cluster_centers = None
     for _ in range(max_iters):
         # ---------- 2. 更新中心：以"隶属度的 m 次方"为权重的加权平均 ----------
         new_centers = []
-        for j in range(num_clusters):
-            weights = [memberships[i][j] ** fuzziness for i in range(num_points)]
-            weight_sum = sum(weights)
-            new_centers.append([
-                sum(weight * data_points[i][d] for i, weight in enumerate(weights)) / weight_sum
-                for d in range(num_dims)
-            ])
+        for cluster_idx in range(num_clusters):
+            weights = []
+            for point_idx in range(num_points):
+                weight = memberships[point_idx][cluster_idx] ** fuzziness
+                weights.append(weight)
+
+            weight_sum = 0.0
+            for weight in weights:
+                weight_sum += weight
+
+            center = []
+            for dimension_idx in range(num_dims):
+                weighted_sum = 0.0
+                for point_idx, weight in enumerate(weights):
+                    weighted_sum += weight * data_points[point_idx][dimension_idx]
+                center.append(weighted_sum / weight_sum)
+            new_centers.append(center)
 
         # ---------- 3. 更新隶属度：离哪个中心越近，属于它的程度越高 ----------
-        for i, point in enumerate(data_points):
-            distances = [squared_distance(point, center) for center in new_centers]
-            if min(distances) == 0:  # 样本恰好落在某中心上：直接完全属于该簇
-                memberships[i] = [1.0 if d == 0 else 0.0 for d in distances]
+        for point_idx, point in enumerate(data_points):
+            distances = []
+            for center in new_centers:
+                distances.append(squared_distance(point, center))
+
+            min_distance = distances[0]
+            for distance in distances[1:]:
+                if distance < min_distance:
+                    min_distance = distance
+
+            if min_distance == 0:  # 样本恰好落在某中心上：直接完全属于该簇
+                new_memberships = []
+                for distance in distances:
+                    if distance == 0:
+                        new_membership = 1.0
+                    else:
+                        new_membership = 0.0
+                    new_memberships.append(new_membership)
+                memberships[point_idx] = new_memberships
             else:
-                memberships[i] = [
-                    1.0 / sum((distances[j] / distances[k]) ** exponent
-                              for k in range(num_clusters))
-                    for j in range(num_clusters)
-                ]
+                new_memberships = []
+                for cluster_idx in range(num_clusters):
+                    denominator = 0.0
+                    for other_idx in range(num_clusters):
+                        denominator += (
+                            distances[cluster_idx] / distances[other_idx]
+                        ) ** exponent
+                    new_memberships.append(1.0 / denominator)
+                memberships[point_idx] = new_memberships
 
         # ---------- 4. 收敛判断：中心几乎不再移动就提前结束 ----------
-        if cluster_centers is not None and all(
-            all(abs(a - b) < tolerance for a, b in zip(old_center, new_center))
-            for old_center, new_center in zip(cluster_centers, new_centers)
-        ):
-            break
+        if cluster_centers is not None:
+            converged = True
+            for old_center, new_center in zip(cluster_centers, new_centers):
+                for old_coordinate, new_coordinate in zip(old_center, new_center):
+                    if abs(old_coordinate - new_coordinate) >= tolerance:
+                        converged = False
+
+            if converged:
+                break
         cluster_centers = new_centers
 
     return cluster_centers, memberships
@@ -76,20 +121,39 @@ def fuzzy_c_means(data_points, num_clusters, fuzziness=2.0, max_iters=100,
 if __name__ == "__main__":
     # 构造一个简单的二维数据集：三团明显分开的点（与 k_means.py 相同）
     rng = random.Random(42)
-    data_points = (
-        [[rng.gauss(0, 0.5), rng.gauss(0, 0.5)] for _ in range(100)]      # 中心 (0,0)
-        + [[rng.gauss(5, 0.5), rng.gauss(5, 0.5)] for _ in range(100)]    # 中心 (5,5)
-        + [[rng.gauss(10, 0.5), rng.gauss(10, 0.5)] for _ in range(100)]  # 中心 (10,0)
-    )
+    data_points = []
+    for _ in range(100):
+        data_points.append([rng.gauss(0, 0.5), rng.gauss(0, 0.5)])  # 中心 (0,0)
+    for _ in range(100):
+        data_points.append([rng.gauss(5, 0.5), rng.gauss(5, 0.5)])  # 中心 (5,5)
+    for _ in range(100):
+        data_points.append([rng.gauss(10, 0.5), rng.gauss(10, 0.5)])  # 中心 (10,0)
 
     cluster_centers, memberships = fuzzy_c_means(data_points, num_clusters=3)
 
     print("聚类中心:")
     for center in cluster_centers:
-        print([round(value, 3) for value in center])
+        rounded_center = []
+        for value in center:
+            rounded_center.append(round(value, 3))
+        print(rounded_center)
     print("前 3 个样本的隶属度（每行三列之和为 1）:")
     for row in memberships[:3]:
-        print([round(value, 3) for value in row])
+        rounded_row = []
+        for value in row:
+            rounded_row.append(round(value, 3))
+        print(rounded_row)
     # 取隶属度最大的簇作为"硬"聚类结果，统计各簇样本数
-    hard_labels = [max(range(3), key=lambda j: row[j]) for row in memberships]
-    print("各簇样本数:", [hard_labels.count(j) for j in range(3)])
+    hard_labels = []
+    for row in memberships:
+        best_cluster_idx = 0
+        highest_membership = row[0]
+        for cluster_idx in range(1, 3):
+            if row[cluster_idx] > highest_membership:
+                best_cluster_idx = cluster_idx
+                highest_membership = row[cluster_idx]
+        hard_labels.append(best_cluster_idx)
+    cluster_sizes = []
+    for cluster_idx in range(3):
+        cluster_sizes.append(hard_labels.count(cluster_idx))
+    print("各簇样本数:", cluster_sizes)

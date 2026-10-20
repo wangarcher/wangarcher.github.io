@@ -6,7 +6,11 @@ import random
 
 def squared_distance(point_a, point_b):
     """两点之间欧氏距离的平方（不开方也能比较远近）"""
-    return sum((a - b) ** 2 for a, b in zip(point_a, point_b))
+    distance = 0.0
+    for coordinate_a, coordinate_b in zip(point_a, point_b):
+        difference = coordinate_a - coordinate_b
+        distance += difference * difference
+    return distance
 
 
 def mini_batch_k_means(data_points, num_clusters, batch_size=32, num_batches=100, seed=0):
@@ -26,8 +30,13 @@ def mini_batch_k_means(data_points, num_clusters, batch_size=32, num_batches=100
     rng = random.Random(seed)
 
     # ---------- 1. 初始化：随机选 num_clusters 个样本作为初始中心 ----------
-    cluster_centers = [list(point) for point in rng.sample(data_points, num_clusters)]
-    update_counts = [0] * num_clusters  # 各中心被更新过的次数，用来算学习率
+    sampled_points = rng.sample(data_points, num_clusters)
+    cluster_centers = []
+    for point in sampled_points:
+        cluster_centers.append(list(point))
+    update_counts = []  # 各中心被更新过的次数，用来算学习率
+    for _ in range(num_clusters):
+        update_counts.append(0)
 
     # ---------- 2. 小批量更新：每批只抽 batch_size 个样本，逐个微调最近的中心 ----------
     for _ in range(num_batches):
@@ -35,23 +44,33 @@ def mini_batch_k_means(data_points, num_clusters, batch_size=32, num_batches=100
 
         for point in batch:
             # 找当前样本最近的中心
-            nearest_idx = min(
-                range(num_clusters),
-                key=lambda idx: squared_distance(point, cluster_centers[idx]),
-            )
+            nearest_cluster_idx = 0
+            nearest_distance = squared_distance(point, cluster_centers[0])
+            for cluster_idx in range(1, num_clusters):
+                distance = squared_distance(point, cluster_centers[cluster_idx])
+                if distance < nearest_distance:
+                    nearest_cluster_idx = cluster_idx
+                    nearest_distance = distance
             # 更新次数越多学习率越小：中心向当前样本滑动的步长逐步衰减
-            update_counts[nearest_idx] += 1
-            learning_rate = 1.0 / update_counts[nearest_idx]
-            cluster_centers[nearest_idx] = [
-                (1 - learning_rate) * c + learning_rate * p
-                for c, p in zip(cluster_centers[nearest_idx], point)
-            ]
+            update_counts[nearest_cluster_idx] += 1
+            learning_rate = 1.0 / update_counts[nearest_cluster_idx]
+            updated_center = []
+            for coordinate, point_value in zip(cluster_centers[nearest_cluster_idx], point):
+                updated_coordinate = (1 - learning_rate) * coordinate + learning_rate * point_value
+                updated_center.append(updated_coordinate)
+            cluster_centers[nearest_cluster_idx] = updated_center
 
     # ---------- 3. 用最终中心给全体样本分配簇编号 ----------
-    cluster_labels = [
-        min(range(num_clusters), key=lambda idx: squared_distance(point, cluster_centers[idx]))
-        for point in data_points
-    ]
+    cluster_labels = []
+    for point in data_points:
+        nearest_cluster_idx = 0
+        nearest_distance = squared_distance(point, cluster_centers[0])
+        for cluster_idx in range(1, num_clusters):
+            distance = squared_distance(point, cluster_centers[cluster_idx])
+            if distance < nearest_distance:
+                nearest_cluster_idx = cluster_idx
+                nearest_distance = distance
+        cluster_labels.append(nearest_cluster_idx)
 
     return cluster_centers, cluster_labels
 
@@ -59,15 +78,23 @@ def mini_batch_k_means(data_points, num_clusters, batch_size=32, num_batches=100
 if __name__ == "__main__":
     # 构造一个简单的二维数据集：三团明显分开的点（与 k_means.py 相同）
     rng = random.Random(42)
-    data_points = (
-        [[rng.gauss(0, 0.5), rng.gauss(0, 0.5)] for _ in range(100)]      # 中心 (0,0)
-        + [[rng.gauss(5, 0.5), rng.gauss(5, 0.5)] for _ in range(100)]    # 中心 (5,5)
-        + [[rng.gauss(10, 0.5), rng.gauss(10, 0.5)] for _ in range(100)]  # 中心 (10,0)
-    )
+    data_points = []
+    for _ in range(100):
+        data_points.append([rng.gauss(0, 0.5), rng.gauss(0, 0.5)])  # 中心 (0,0)
+    for _ in range(100):
+        data_points.append([rng.gauss(5, 0.5), rng.gauss(5, 0.5)])  # 中心 (5,5)
+    for _ in range(100):
+        data_points.append([rng.gauss(10, 0.5), rng.gauss(10, 0.5)])  # 中心 (10,0)
 
     cluster_centers, cluster_labels = mini_batch_k_means(data_points, num_clusters=3)
 
     print("聚类中心:")
     for center in cluster_centers:
-        print([round(value, 3) for value in center])
-    print("各簇样本数:", [cluster_labels.count(j) for j in range(3)])
+        rounded_center = []
+        for value in center:
+            rounded_center.append(round(value, 3))
+        print(rounded_center)
+    cluster_sizes = []
+    for cluster_idx in range(3):
+        cluster_sizes.append(cluster_labels.count(cluster_idx))
+    print("各簇样本数:", cluster_sizes)

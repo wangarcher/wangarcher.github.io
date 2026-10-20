@@ -6,12 +6,19 @@ import random
 
 def squared_distance(point_a, point_b):
     """两点之间欧氏距离的平方（不开方也能比较远近）"""
-    return sum((a - b) ** 2 for a, b in zip(point_a, point_b))
+    distance = 0.0
+    for coordinate_a, coordinate_b in zip(point_a, point_b):
+        difference = coordinate_a - coordinate_b
+        distance += difference * difference
+    return distance
 
 
 def total_distance(candidate, cluster_points):
     """candidate 到簇内所有成员的距离平方总和，越小说明它越适合当这个簇的中心点"""
-    return sum(squared_distance(candidate, point) for point in cluster_points)
+    distance_sum = 0.0
+    for point in cluster_points:
+        distance_sum += squared_distance(candidate, point)
+    return distance_sum
 
 
 def k_medoids(data_points, num_clusters, max_iters=100, seed=0):
@@ -34,20 +41,37 @@ def k_medoids(data_points, num_clusters, max_iters=100, seed=0):
 
     for _ in range(max_iters):
         # ---------- 2. 分配步骤：每个样本归入最近的中心点 ----------
-        cluster_labels = [
-            min(range(num_clusters), key=lambda idx: squared_distance(point, medoids[idx]))
-            for point in data_points
-        ]
+        cluster_labels = []
+        for point in data_points:
+            nearest_cluster_idx = 0
+            nearest_distance = squared_distance(point, medoids[0])
+            for cluster_idx in range(1, num_clusters):
+                distance = squared_distance(point, medoids[cluster_idx])
+                if distance < nearest_distance:
+                    nearest_cluster_idx = cluster_idx
+                    nearest_distance = distance
+            cluster_labels.append(nearest_cluster_idx)
 
         # ---------- 3. 更新步骤：在每个簇里挑"到其他成员总距离最小"的样本当新中心点 ----------
-        members = [[] for _ in range(num_clusters)]  # members[j] 为第 j 簇的全部样本
+        members = []  # members[j] 为第 j 簇的全部样本
+        for _ in range(num_clusters):
+            members.append([])
         for point, label in zip(data_points, cluster_labels):
             members[label].append(point)
-        new_medoids = [
-            min(cluster, key=lambda candidate: total_distance(candidate, cluster))
-            if cluster else medoids[j]  # 空簇保留原中心点
-            for j, cluster in enumerate(members)
-        ]
+        new_medoids = []
+        for cluster_idx, cluster_points in enumerate(members):
+            if not cluster_points:
+                new_medoids.append(medoids[cluster_idx])
+                continue
+
+            best_medoid = cluster_points[0]
+            best_distance = total_distance(best_medoid, cluster_points)
+            for point in cluster_points[1:]:
+                distance = total_distance(point, cluster_points)
+                if distance < best_distance:
+                    best_medoid = point
+                    best_distance = distance
+            new_medoids.append(best_medoid)
 
         # ---------- 4. 收敛判断：中心点不再变化就提前结束 ----------
         if new_medoids == medoids:
@@ -60,15 +84,23 @@ def k_medoids(data_points, num_clusters, max_iters=100, seed=0):
 if __name__ == "__main__":
     # 构造一个简单的二维数据集：三团明显分开的点（与 k_means.py 相同）
     rng = random.Random(42)
-    data_points = (
-        [[rng.gauss(0, 0.5), rng.gauss(0, 0.5)] for _ in range(100)]      # 中心 (0,0)
-        + [[rng.gauss(5, 0.5), rng.gauss(5, 0.5)] for _ in range(100)]    # 中心 (5,5)
-        + [[rng.gauss(10, 0.5), rng.gauss(10, 0.5)] for _ in range(100)]  # 中心 (10,0)
-    )
+    data_points = []
+    for _ in range(100):
+        data_points.append([rng.gauss(0, 0.5), rng.gauss(0, 0.5)])  # 中心 (0,0)
+    for _ in range(100):
+        data_points.append([rng.gauss(5, 0.5), rng.gauss(5, 0.5)])  # 中心 (5,5)
+    for _ in range(100):
+        data_points.append([rng.gauss(10, 0.5), rng.gauss(10, 0.5)])  # 中心 (10,0)
 
     medoids, cluster_labels = k_medoids(data_points, num_clusters=3)
 
     print("中心点（medoid，是真实样本）:")
     for medoid in medoids:
-        print([round(value, 3) for value in medoid])
-    print("各簇样本数:", [cluster_labels.count(j) for j in range(3)])
+        rounded_medoid = []
+        for value in medoid:
+            rounded_medoid.append(round(value, 3))
+        print(rounded_medoid)
+    cluster_sizes = []
+    for cluster_idx in range(3):
+        cluster_sizes.append(cluster_labels.count(cluster_idx))
+    print("各簇样本数:", cluster_sizes)

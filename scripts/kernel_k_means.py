@@ -8,7 +8,11 @@ import random
 
 def squared_distance(point_a, point_b):
     """两点之间欧氏距离的平方"""
-    return sum((a - b) ** 2 for a, b in zip(point_a, point_b))
+    distance = 0.0
+    for coordinate_a, coordinate_b in zip(point_a, point_b):
+        difference = coordinate_a - coordinate_b
+        distance += difference * difference
+    return distance
 
 
 def rbf_kernel(point_a, point_b, gamma):
@@ -37,35 +41,49 @@ def kernel_k_means(data_points, num_clusters, gamma=1.0, max_iters=100, seed=0):
     num_points = len(data_points)
 
     # ---------- 1. 预计算核矩阵（对称矩阵，之后所有迭代都只查表） ----------
-    kernel_matrix = [
-        [rbf_kernel(point_a, point_b, gamma) for point_b in data_points]
-        for point_a in data_points
-    ]
+    kernel_matrix = []
+    for point_a in data_points:
+        row = []
+        for point_b in data_points:
+            row.append(rbf_kernel(point_a, point_b, gamma))
+        kernel_matrix.append(row)
 
     # ---------- 2. 初始化：随机给每个样本分配一个簇编号 ----------
-    cluster_labels = [rng.randrange(num_clusters) for _ in range(num_points)]
+    cluster_labels = []
+    for _ in range(num_points):
+        cluster_labels.append(rng.randrange(num_clusters))
 
     for _ in range(max_iters):
         # ---------- 3. 分配步骤：用核矩阵算特征空间距离，取最近的簇 ----------
         new_labels = []
-        for i in range(num_points):
-            best_label, best_dist = None, None
-            for j in range(num_clusters):
-                member_indices = [l for l in range(num_points) if cluster_labels[l] == j]
+        for point_idx in range(num_points):
+            best_label = None
+            best_dist = None
+            for cluster_idx in range(num_clusters):
+                member_indices = []
+                for member_idx in range(num_points):
+                    if cluster_labels[member_idx] == cluster_idx:
+                        member_indices.append(member_idx)
                 if not member_indices:
                     continue  # 空簇没有中心，跳过
 
                 size = len(member_indices)
+                intra_sum = 0.0
+                for member_idx in member_indices:
+                    intra_sum += kernel_matrix[point_idx][member_idx]
+
+                pair_sum = 0.0
+                for member_idx in member_indices:
+                    for other_idx in member_indices:
+                        pair_sum += kernel_matrix[member_idx][other_idx]
+
                 dist = (
-                    kernel_matrix[i][i]  # ||φ(x)||²
-                    - 2.0 / size * sum(kernel_matrix[i][l] for l in member_indices)
-                    + 1.0 / size ** 2 * sum(
-                        kernel_matrix[l][m]
-                        for l in member_indices for m in member_indices
-                    )
+                    kernel_matrix[point_idx][point_idx]  # ||φ(x)||²
+                    - 2.0 / size * intra_sum
+                    + 1.0 / size ** 2 * pair_sum
                 )
                 if best_dist is None or dist < best_dist:
-                    best_label, best_dist = j, dist
+                    best_label, best_dist = cluster_idx, dist
             new_labels.append(best_label)
 
         # ---------- 4. 收敛判断：分配不再变化就提前结束 ----------
@@ -95,6 +113,17 @@ if __name__ == "__main__":
 
     cluster_labels = kernel_k_means(data_points, num_clusters=2, gamma=0.5)
 
-    print("各簇样本数:", [cluster_labels.count(j) for j in range(2)])
-    print("内环被分到各簇的数量:", [cluster_labels[:100].count(j) for j in range(2)])
-    print("外环被分到各簇的数量:", [cluster_labels[100:].count(j) for j in range(2)])
+    cluster_sizes = []
+    for cluster_idx in range(2):
+        cluster_sizes.append(cluster_labels.count(cluster_idx))
+    print("各簇样本数:", cluster_sizes)
+
+    inner_ring_sizes = []
+    for cluster_idx in range(2):
+        inner_ring_sizes.append(cluster_labels[:100].count(cluster_idx))
+    print("内环被分到各簇的数量:", inner_ring_sizes)
+
+    outer_ring_sizes = []
+    for cluster_idx in range(2):
+        outer_ring_sizes.append(cluster_labels[100:].count(cluster_idx))
+    print("外环被分到各簇的数量:", outer_ring_sizes)
